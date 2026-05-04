@@ -8,19 +8,19 @@ The project provides 200+ string operations organized into 12 categories. Each o
 
 ```mermaid
 graph TD
-    Ops[200+ Operations] --> C1[Case/Text Transform<br/>16 ops]
-    Ops --> C2[Rearrange<br/>13 ops]
-    Ops --> C3[Format<br/>21 ops]
-    Ops --> C4[Encode/Decode<br/>29 ops]
-    Ops --> C5[Ciphers<br/>4 ops]
-    Ops --> C6[Hash/Digest<br/>33 ops]
-    Ops --> C7[Key Derivation<br/>8 ops]
-    Ops --> C8[Escape/Unescape<br/>15 ops]
-    Ops --> C9[JSON/Format<br/>11 ops]
-    Ops --> C10[Statistics<br/>24 ops]
-    Ops --> C11[Extract<br/>13 ops]
-    Ops --> C12[Manipulate<br/>11 ops]
-    Ops --> C13[Generate<br/>12 ops]
+    Ops["200+ Operations"] --> C1["Case/Text Transform (16 ops)"]
+    Ops --> C2["Rearrange (13 ops)"]
+    Ops --> C3["Format (21 ops)"]
+    Ops --> C4["Encode/Decode (29 ops)"]
+    Ops --> C5["Ciphers (4 ops)"]
+    Ops --> C6["Hash/Digest (33 ops)"]
+    Ops --> C7["Key Derivation (8 ops)"]
+    Ops --> C8["Escape/Unescape (15 ops)"]
+    Ops --> C9["JSON/Format (11 ops)"]
+    Ops --> C10["Statistics (24 ops)"]
+    Ops --> C11["Extract (13 ops)"]
+    Ops --> C12["Manipulate (11 ops)"]
+    Ops --> C13["Generate (12 ops)"]
 ```
 
 ## Operation Registry
@@ -199,13 +199,13 @@ Operations that need additional parameters (like `find_and_replace`, `rotate_cha
 
 ```mermaid
 graph TD
-    Run[_run_operation] --> Exists{func exists<br/>in module?}
+    Run[_run_operation] --> Exists{func exists in module?}
     Exists -->|No| Null[Return None]
-    Exists -->|Yes| Call[Call func(input_text)]
+    Exists -->|Yes| Call["Call func(input_text)"]
     Call --> TypeError{TypeError?}
-    TypeError -->|Yes| ParamErr[Return "Error: requires<br/>additional parameters"]
+    TypeError -->|Yes| ParamErr["Return 'Error: requires additional parameters'"]
     TypeError -->|No| OtherErr{Other Exception?}
-    OtherErr -->|Yes| OpErr[Return "Error executing<br/>operation: {e}"]
+    OtherErr -->|Yes| OpErr["Return 'Error executing operation: ...'"]
     OtherErr -->|No| Success[Return result string]
 ```
 
