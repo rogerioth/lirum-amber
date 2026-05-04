@@ -76,12 +76,10 @@ class FileDialogScreen(ModalScreen):
 
     #btn-open {
         dock: left;
-        variant: primary;
     }
 
     #btn-cancel {
         dock: right;
-        variant: default;
     }
     """
 
@@ -133,7 +131,6 @@ class NotificationScreen(ModalScreen):
         height: 1;
         dock: bottom;
         margin: 1 0;
-        variant: primary;
     }
     """
 
@@ -153,41 +150,65 @@ class NotificationScreen(ModalScreen):
 class CategoryScreen(Screen):
     """Main screen with categories, search, input/output textviews."""
 
-    BINDINGS = [
-        Binding("q", "quit", "Quit"),
-        Binding("ctrl+o", "open_file", "Open File"),
-        Binding("ctrl+s", "save_output", "Save Output"),
-        Binding("ctrl+/", "toggle_search", "Search"),
-        Binding("left", "prev_category", "Prev Category"),
-        Binding("right", "next_category", "Next Category"),
-        Binding("up", "move_up", "Up"),
-        Binding("down", "move_down", "Down"),
-        Binding("enter", "execute_operation", "Execute"),
-    ]
-
     CSS = """
-    Screen {
-        layout: vertical;
+    #main-container {
+        layout: grid;
+        grid-size: 2 1;
+        grid-gutter: 1 2;
+        height: 1fr;
     }
 
-    #title {
+    #categories-pane {
+        width: 32;
+        height: 100%;
+        border: solid $primary;
+        padding: 0 1;
+    }
+
+    #categories-table {
+        width: 100%;
+        height: 100%;
+    }
+
+    #operations-pane {
         width: 1fr;
-        height: 3;
-        content-align: center middle;
-        background: $accent;
+        height: 100%;
+        border: solid $primary;
+        padding: 0 1;
+    }
+
+    #operations-table {
+        width: 100%;
+        height: 100%;
+    }
+
+    #input-output-container {
+        height: 10;
+    }
+
+    #text-input {
+        width: 1fr;
+        height: 100%;
+        border: solid $primary;
+    }
+
+    #text-output {
+        width: 1fr;
+        height: 100%;
+        border: solid $primary;
+    }
+
+    #status-bar {
+        height: 1;
+        width: 100%;
+        background: $primary;
         color: $text;
-    }
-
-    Container > #title {
-        width: 1fr;
-        height: 3;
+        padding: 0 1;
     }
 
     #search-section {
-        width: 1fr;
         height: 3;
         display: none;
-        padding: 0 1;
     }
 
     #search-section.visible {
@@ -195,295 +216,341 @@ class CategoryScreen(Screen):
     }
 
     #search-input {
-        width: 1fr;
+        width: 100%;
     }
 
-    #main-content {
-        width: 1fr;
-        height: 1fr;
-    }
-
-    #categories-pane {
-        width: 35%;
-        height: 1fr;
-    }
-
-    #categories-title {
-        width: 1fr;
+    #category-label, #operations-label {
+        width: 100%;
         height: 1;
-        padding: 0 1;
-        text-align: center;
-        color: $text;
-        background: $boost;
-    }
-
-    #category-label {
-        width: 1fr;
-        height: 1;
-        padding: 0 1;
-        text-align: center;
-        color: $text;
-        background: $accent;
-    }
-
-    DataTable#operations-table {
-        width: 1fr;
-        height: 1fr;
-    }
-
-    DataTable#operations-table > .datatable--cursor {
         background: $accent;
         color: $text;
-    }
-
-    #text-panes {
-        width: 65%;
-        height: 1fr;
-    }
-
-    #input-section {
-        height: 50%;
-        width: 1fr;
-    }
-
-    #output-section {
-        height: 50%;
-        width: 1fr;
-    }
-
-    #input-label, #output-label {
-        width: 1fr;
-        padding: 0 1;
-        color: $text;
-        background: $boost;
-    }
-
-    #input-label {
-        content-align: left middle;
-    }
-
-    #output-label {
-        content-align: left middle;
-    }
-
-    #text-input, #text-output {
-        width: 1fr;
-        height: 1fr;
-        border: solid $accent;
-        padding: 1;
-    }
-
-    #text-output {
-        border: solid $success;
-    }
-
-    #status-bar {
-        width: 1fr;
-        height: 3;
-        content-align: center middle;
+        text-align: center;
     }
     """
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._current_category = None
-        self._current_operation = None
-        self._search_visible = False
-        self._search_query = ""
-        self._operations = {}
-        self._category_names = []
-        self._operation_map = {}  # Maps operation name to function name
-        self._load_operations()
+    BINDINGS = [
+        Binding("q", "quit", "Quit"),
+        Binding("ctrl+o", "open_file", "Open File"),
+        Binding("ctrl+s", "save_output", "Save Output"),
+        Binding("ctrl+/", "toggle_search", "Search"),
+        Binding("tab", "focus_next", "Switch Pane"),
+        Binding("enter", "execute_operation", "Execute", show=False),
+    ]
 
-    def _load_operations(self):
-        """Load all operations from string_ops.utils."""
-        from string_ops.utils import get_all_operations
-        self._operations = get_all_operations()
-        self._category_names = list(self._operations.keys())
-        # Build operation name to function name mapping
-        self._operation_map = {}
-        for category, ops in self._operations.items():
-            for name, func_name in ops:
-                self._operation_map[name] = func_name
+    _current_category = None
+    _current_operation = None
+    _search_visible = False
+    _search_query = ""
 
     def compose(self) -> ComposeResult:
-        with Container():
-            yield Static("String Operations TUI", id="title")
-
         with Container(id="search-section"):
-            yield Input(placeholder="Search operations... (Ctrl+/ to toggle)", id="search-input")
-
-        with Horizontal(id="main-content"):
+            yield Input(placeholder="Search operations...", id="search-input")
+        with Container(id="main-container"):
             with Vertical(id="categories-pane"):
-                yield Static("Categories", id="categories-title")
-                yield Static("", id="category-label")
+                yield Static("CATEGORIES", id="category-label")
+                yield DataTable(id="categories-table")
+            with Vertical(id="operations-pane"):
+                yield Static("OPERATIONS", id="operations-label")
                 yield DataTable(id="operations-table")
-
-            with Vertical(id="text-panes"):
-                with Vertical(id="input-section"):
-                    yield Static("Input", id="input-label")
-                    yield TextArea(id="text-input")
-
-                with Vertical(id="output-section"):
-                    yield Static("Output", id="output-label")
-                    yield TextArea(id="text-output")
-
+        with Horizontal(id="input-output-container"):
+            yield TextArea(id="text-input")
+            yield TextArea(id="text-output")
         yield Static("", id="status-bar")
 
     def on_mount(self) -> None:
-        """Initialize the screen."""
-        self._current_category = self._category_names[0] if self._category_names else None
-        self._update_category_label()
-        self._init_operations_table()
+        from operations_mapping import OPERATIONS
+        self._operations = OPERATIONS
+        self._operation_map = {}
+        for ops in OPERATIONS.values():
+            for display_name, func_name in ops:
+                self._operation_map[display_name] = func_name
+
+        cat_table = self.query_one("#categories-table", DataTable)
+        cat_table.add_columns("Category")
+        cat_table.cursor_type = "row"
+        for category in self._operations.keys():
+            cat_table.add_row(category)
+        cat_table.move_cursor(row=0)
+
+        op_table = self.query_one("#operations-table", DataTable)
+        op_table.add_columns("Operation", "Description")
+        op_table.cursor_type = "row"
+
+        self._current_category = cat_table.get_row_at(0)[0]
         self._populate_operations_table()
         self._update_status()
-        title = self.query_one("#title", Static)
-        cat_names = ", ".join(self._category_names) if self._category_names else "none"
-        title.update(
-            f"[bold]String Operations TUI[/bold]  "
-            f"[dim]Categories: {cat_names}  |  Ctrl+/ Search  |  Ctrl+O Open  |  Ctrl+S Save  |  Q Quit[/dim]"
-        )
 
-    def _init_operations_table(self) -> None:
-        """Initialize the operations table with columns (called once)."""
-        table = self.query_one("#operations-table", DataTable)
-        table.add_columns("Operation", "Description")
+        cat_table.focus()
+
+    def on_data_table_row_highlighted(self, event: DataTable.RowHighlighted) -> None:
+        if event.data_table.id == "categories-table":
+            self._set_category_from_table(event.data_table)
+        elif event.data_table.id == "operations-table":
+            if event.data_table.row_count > 0 and event.data_table.cursor_row < event.data_table.row_count:
+                row_data = event.data_table.get_row_at(event.data_table.cursor_row)
+                self._current_operation = row_data[0]
+                self._update_status()
+
+    def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
+        if event.data_table.id == "operations-table":
+            self.action_execute_operation()
+
+    def _set_category_from_table(self, table: DataTable) -> None:
+        """Set current category from table selection."""
+        if table.row_count > 0:
+            row_data = table.get_row_at(table.cursor_row)
+            selected_category = row_data[0]
+            if selected_category != self._current_category:
+                self._current_category = selected_category
+                self._update_category_label()
+                self._populate_operations_table()
+                self._update_status()
+
+    def on_text_area_changed(self, event: TextArea.Changed) -> None:
+        """Handle real-time text input changes."""
+        if event.text_area.id != "text-input":
+            return
+        if not self._current_operation:
+            return
+        func_name = self._operation_map.get(self._current_operation)
+        if not func_name:
+            return
+        input_text = event.text_area.text
+        result = self._run_operation(func_name, input_text)
+        if result is not None:
+            output_area = self.query_one("#text-output", TextArea)
+            # Avoid cursor jump by only updating if different
+            if output_area.text != str(result):
+                output_area.text = str(result)
+            self._update_status()
 
     def _update_category_label(self) -> None:
-        """Update the category label display."""
+        label = self.query_one("#operations-label", Static)
         if self._current_category:
-            count = len(self._operations.get(self._current_category, []))
-            label = f"[bold]{self._current_category}[/bold]  [{count} operations]"
-            cat_label = self.query_one("#category-label", Static)
-            cat_label.update(label)
-
-    def _populate_operations_table(self) -> None:
-        """Populate the operations table."""
-        table = self.query_one("#operations-table", DataTable)
-        table.clear()
-
-        operations = self._operations.get(self._current_category, [])
-        for i, (name, func_name) in enumerate(operations):
-            desc = self._get_operation_description(name)
-            table.add_row(name, desc, key=str(i))
-
-        if operations:
-            table.move_cursor(row=0, column=0)
+            label.update(f"[bold]{self._current_category}[/bold] OPERATIONS")
+        else:
+            label.update("OPERATIONS")
 
     def _get_operation_description(self, name: str) -> str:
-        """Get a short description for an operation."""
         descriptions = {
-            "To Uppercase": "Convert text to uppercase",
-            "To Lowercase": "Convert text to lowercase",
-            "To Title Case": "Capitalize first letter of each word",
-            "To Sentence Case": "Capitalize first letter of each sentence",
-            "Swap Case": "Swap uppercase and lowercase",
-            "CamelCase": "Convert to camelCase",
-            "PascalCase": "Convert to PascalCase",
-            "snake_case": "Convert to snake_case",
-            "kebab-case": "Convert to kebab-case",
-            "CONSTANT_CASE": "Convert to CONSTANT_CASE",
-            "Reverse": "Reverse the entire string",
+            "Lowercase": "Convert all chars to lowercase",
+            "Uppercase": "Convert all chars to uppercase",
+            "Title Case": "Capitalize first letter of each word",
+            "Camel Case": "Convert to camelCase",
+            "Pascal Case": "Convert to PascalCase",
+            "Snake Case": "Convert to snake_case",
+            "Kebab Case": "Convert to kebab-case",
+            "Constant Case": "Convert to CONSTANT_CASE",
+            "Dot Case": "Convert to dot.case",
+            "Path Case": "Convert to path/case",
+            "Sentence Case": "Capitalize first letter of each sentence",
+            "Swap Case": "Swap uppercase <-> lowercase",
+            "Alternating Case": "aLtErNaTiNg CaSe",
+            "Sponge Case": "sPoNgE cAsE",
+            "Capitalize First Letter": "Capitalize first letter only",
+            "Decapitalize First Letter": "Lowercase first letter only",
+            "Reverse String": "Reverse the entire string",
             "Reverse Words": "Reverse word order",
             "Reverse Lines": "Reverse line order",
-            "Rotate N Characters": "Caesar-style rotation",
-            "Repeat N Times": "Repeat string N times",
-            "Base64 Encode": "Encode to Base64",
-            "Base64 Decode": "Decode from Base64",
-            "URL Encode": "Percent-encode for URLs",
-            "URL Decode": "Percent-decode from URLs",
-            "HTML Entity Encode": "Convert to HTML entities",
-            "HTML Entity Decode": "Convert from HTML entities",
-            "Hex Encode": "Convert to hex string",
-            "Hex Decode": "Convert from hex string",
-            "ROT13": "Apply ROT13 cipher",
-            "Unicode Escape": "Convert to unicode sequences",
-            "Unicode Unescape": "Convert unicode to characters",
-            "Binary Encode": "Convert to binary",
-            "Binary Decode": "Convert from binary",
-            "Octal Encode": "Convert to octal",
-            "Octal Decode": "Convert from octal",
-            "JSON Escape": "Escape for JSON string",
-            "JSON Unescape": "Unescape JSON string",
-            "JSON Pretty Print": "Format JSON with indentation",
-            "JSON Minify": "Compact JSON",
-            "JSON to String": "Parse JSON to string",
-            "String to JSON": "Wrap text as JSON string",
-            "JSON Diff": "Compare two JSON inputs",
-            "JSON Path Extract": "Extract value by JSONPath",
-            "Trim (both)": "Strip leading/trailing whitespace",
-            "Trim Left": "Strip leading whitespace",
-            "Trim Right": "Strip trailing whitespace",
-            "Trim Newlines": "Strip leading/trailing newlines",
-            "Collapse Whitespace": "Replace runs of whitespace",
+            "Shuffle Characters": "Randomly shuffle characters",
+            "Shuffle Words": "Randomly shuffle words",
+            "Shuffle Lines": "Randomly shuffle lines",
+            "Sort Characters (Ascending)": "Sort chars A-Z",
+            "Sort Characters (Descending)": "Sort chars Z-A",
+            "Sort Words (Ascending)": "Sort words A-Z",
+            "Sort Words (Descending)": "Sort words Z-A",
+            "Sort Lines (Ascending)": "Sort lines A-Z",
+            "Sort Lines (Descending)": "Sort lines Z-A",
+            "Sort Lines by Length": "Sort lines shortest to longest",
+            "Trim": "Strip leading/trailing whitespace",
+            "Trim Left (Ltrim)": "Strip leading whitespace",
+            "Trim Right (Rtrim)": "Strip trailing whitespace",
+            "Remove Extra Spaces": "Collapse multiple spaces to one",
+            "Remove All Whitespace": "Strip all whitespace chars",
             "Remove Empty Lines": "Remove blank lines",
             "Remove Duplicate Lines": "Remove duplicate lines",
-            "Sort Lines": "Sort lines alphabetically",
-            "Deduplicate Lines": "Remove consecutive duplicates",
-            "Indent": "Add indentation",
-            "Unindent": "Remove indentation",
-            "Wrap Text": "Wrap to N columns",
-            "Replace Line Endings": "CRLF <-> LF <-> CR",
-            "Normalize Unicode": "NFC/NFD/NFKC/NFKD",
-            "Strip Non-ASCII": "Remove non-ASCII characters",
-            "Remove Diacritics": "Strip accents",
-            "Slugify": "Convert to URL slug",
-            "Truncate": "Truncate with suffix",
-            "Pad Left": "Pad on the left",
-            "Pad Right": "Pad on the right",
-            "Add Line Numbers": "Prefix line numbers",
-            "Remove Line Numbers": "Strip line numbers",
-            "Extract Lines": "Extract lines in range",
-            "Repeat Lines N Times": "Repeat each line N times",
-            "Find and Replace": "Find and replace text",
-            "Find and Replace All": "Replace all occurrences",
-            "Regex Find": "Find all regex matches",
-            "Regex Replace": "Replace regex matches",
-            "Count Matches": "Count regex matches",
-            "Extract Regex Groups": "Extract captured groups",
+            "Remove Duplicate Words": "Remove duplicate words",
+            "Pad Left": "Pad string to length on left",
+            "Pad Right": "Pad string to length on right",
+            "Center Align": "Center-align text",
+            "Left Align": "Left-align text",
+            "Right Align": "Right-align text",
+            "Justify": "Justify paragraph text",
+            "Spaces to Tabs": "Convert spaces to tabs",
+            "Tabs to Spaces": "Convert tabs to spaces",
+            "Expand Tabs": "Expand tab characters",
+            "Wrap Text": "Wrap text to specified width",
+            "Normalize Newlines (CRLF to LF)": "Convert CRLF to LF",
+            "Normalize Newlines (LF to CRLF)": "Convert LF to CRLF",
+            "Normalize Newlines (CR to LF)": "Convert CR to LF",
+            "Base64 Encode": "Encode to Base64",
+            "Base64 Decode": "Decode from Base64",
+            "Base64url Encode": "Encode to URL-safe Base64",
+            "Base64url Decode": "Decode from URL-safe Base64",
+            "URL Encode": "Percent-encode for URLs",
+            "URL Decode": "Percent-decode from URLs",
+            "HTML Entity Encode": "Encode to HTML entities",
+            "HTML Entity Decode": "Decode from HTML entities",
+            "Hex Encode": "Encode to hex string",
+            "Hex Decode": "Decode from hex string",
+            "Binary Encode": "Encode to binary",
+            "Binary Decode": "Decode from binary",
+            "Octal Encode": "Encode to octal",
+            "Octal Decode": "Decode from octal",
+            "Base32 Encode": "Encode to Base32",
+            "Base32 Decode": "Decode from Base32",
+            "Base58 Encode": "Encode to Base58",
+            "Base58 Decode": "Decode from Base58",
+            "Base85/Ascii85 Encode": "Encode to Base85/Ascii85",
+            "Base85/Ascii85 Decode": "Decode from Base85/Ascii85",
+            "Punycode Encode": "Encode to Punycode",
+            "Punycode Decode": "Decode from Punycode",
+            "Quoted-Printable Encode": "Encode to Quoted-Printable",
+            "Quoted-Printable Decode": "Decode from Quoted-Printable",
+            "ROT13": "Apply ROT13 cipher",
+            "ROT47": "Apply ROT47 cipher",
+            "Atbash Cipher": "Apply Atbash cipher",
+            "Caesar Cipher Encode": "Apply Caesar cipher",
+            "Caesar Cipher Decode": "Decode Caesar cipher",
+            "Vigenère Cipher Encode": "Apply Vigenère cipher",
+            "Vigenère Cipher Decode": "Decode Vigenère cipher",
+            "Morse Code Encode": "Encode to Morse code",
+            "Morse Code Decode": "Decode from Morse code",
+            "MD2 Hash": "MD2 hash digest",
+            "MD4 Hash": "MD4 hash digest",
+            "MD5 Hash": "MD5 hash digest",
+            "SHA-1 Hash": "SHA-1 hash digest",
+            "SHA-224 Hash": "SHA-224 hash digest",
+            "SHA-256 Hash": "SHA-256 hash digest",
+            "SHA-384 Hash": "SHA-384 hash digest",
+            "SHA-512 Hash": "SHA-512 hash digest",
+            "SHA-512/224 Hash": "SHA-512/224 hash digest",
+            "SHA-512/256 Hash": "SHA-512/256 hash digest",
+            "SHA-3-224 Hash": "SHA-3-224 hash digest",
+            "SHA-3-256 Hash": "SHA-3-256 hash digest",
+            "SHA-3-384 Hash": "SHA-3-384 hash digest",
+            "SHA-3-512 Hash": "SHA-3-512 hash digest",
+            "Keccak-224 Hash": "Keccak-224 hash digest",
+            "Keccak-256 Hash": "Keccak-256 hash digest",
+            "Keccak-384 Hash": "Keccak-384 hash digest",
+            "Keccak-512 Hash": "Keccak-512 hash digest",
+            "Shake-128 Hash": "Shake-128 hash digest",
+            "Shake-256 Hash": "Shake-256 hash digest",
+            "BLAKE2b Hash": "BLAKE2b hash digest",
+            "BLAKE2s Hash": "BLAKE2s hash digest",
+            "BLAKE3 Hash": "BLAKE3 hash digest",
+            "RIPEMD-160 Hash": "RIPEMD-160 hash digest",
+            "Whirlpool Hash": "Whirlpool hash digest",
+            "Tiger Hash": "Tiger hash digest",
+            "CRC16": "CRC16 checksum",
+            "CRC32": "CRC32 checksum",
+            "Adler-32": "Adler-32 checksum",
+            "FNV-1a Hash": "FNV-1a hash",
+            "MurmurHash": "MurmurHash hash",
+            "xxHash": "xxHash hash",
+            "HMAC-MD5": "HMAC-MD5 keyed hash",
+            "HMAC-SHA1": "HMAC-SHA1 keyed hash",
+            "HMAC-SHA256": "HMAC-SHA256 keyed hash",
+            "HMAC-SHA512": "HMAC-SHA512 keyed hash",
+            "Bcrypt Hash": "Bcrypt password hash",
+            "Scrypt Hash": "Scrypt password hash",
+            "Argon2 Hash": "Argon2 password hash",
+            "PBKDF2 Hash": "PBKDF2 key derivation",
+            "JSON Escape": "Escape for JSON string",
+            "JSON Unescape": "Unescape JSON string",
+            "XML Escape": "Escape for XML",
+            "XML Unescape": "Unescape XML",
+            "CSV Escape": "Escape for CSV",
+            "CSV Unescape": "Unescape CSV",
+            "SQL Escape": "Escape for SQL string",
+            "Regex Escape": "Escape for regex pattern",
+            "C String Escape": "Escape for C string",
+            "C String Unescape": "Unescape C string",
+            "Java String Escape": "Escape for Java string",
+            "Java String Unescape": "Unescape Java string",
+            "Python String Escape": "Escape for Python string",
+            "Python String Unescape": "Unescape Python string",
+            "Bash Escape": "Escape for Bash string",
+            "Prettify JSON": "Format JSON with indentation",
+            "Minify JSON": "Compact JSON",
+            "Prettify XML": "Format XML with indentation",
+            "Minify XML": "Compact XML",
+            "Prettify SQL": "Format SQL with indentation",
+            "Minify SQL": "Compact SQL",
+            "Prettify CSS": "Format CSS with indentation",
+            "Minify CSS": "Compact CSS",
+            "Parse Query String": "Parse URL query string",
+            "Stringify Query String": "Build URL query string",
+            "JWT Decode": "Decode JWT payload",
+            "Character Count": "Count total characters",
+            "Character Count (No Spaces)": "Count chars excluding spaces",
+            "Word Count": "Count total words",
+            "Line Count": "Count total lines",
+            "Byte Size (UTF-8)": "Count UTF-8 byte size",
+            "Vowel Count": "Count vowel characters",
+            "Consonant Count": "Count consonant characters",
+            "Entropy Calculation": "Shannon entropy",
+            "Levenshtein Distance": "Edit distance",
+            "Jaro-Winkler Distance": "String similarity metric",
+            "Hamming Distance": "Character difference count",
+            "Soundex": "Soundex phonetic code",
+            "Metaphone": "Metaphone phonetic code",
+            "Double Metaphone": "Double Metaphone phonetic code",
+            "Is Palindrome": "Check if string is palindrome",
+            "Is Anagram": "Check if two strings are anagrams",
+            "Find Most Frequent Word": "Most common word",
+            "Find Most Frequent Character": "Most common character",
             "Extract Emails": "Find email addresses",
             "Extract URLs": "Find URLs",
-            "Extract Phone Numbers": "Find phone numbers",
-            "Extract IP Addresses": "Find IPv4/IPv6",
-            "Extract Dates": "Find date patterns",
-            "Extract Between Markers": "Extract between markers",
-            "Extract by Regex": "Extract regex matches",
-            "Extract First N Chars": "Get first N characters",
-            "Extract Last N Chars": "Get last N characters",
-            "Extract by Line Range": "Extract lines N-M",
-            "MD5": "Compute MD5 hash",
-            "SHA-1": "Compute SHA-1 hash",
-            "SHA-256": "Compute SHA-256 hash",
-            "SHA-512": "Compute SHA-512 hash",
-            "CRC32": "Compute CRC32 checksum",
-            "HMAC": "Compute HMAC",
-            "Count Characters": "Total character count",
-            "Count Characters (no space)": "Exclude whitespace",
-            "Count Words": "Word count",
-            "Count Lines": "Line count",
-            "Count Bytes": "Byte count",
-            "Character Frequency": "Frequency of each character",
-            "Word Frequency": "Frequency of each word",
-            "Shannon Entropy": "Calculate Shannon entropy",
-            "Palindrome Check": "Check if palindrome",
-            "Levenshtein Distance": "Edit distance",
-            "Longest Word": "Find the longest word",
-            "Shortest Word": "Find the shortest word",
-            "Unique Words": "Count unique words",
-            "Readability Score": "Flesch-Kincaid score",
-            "Compare Two Texts": "Diff two inputs",
-            "Generate UUID": "Generate random UUID",
-            "Generate Password": "Generate random password",
-            "Generate Lorem Ipsum": "Generate lorem ipsum text",
-            "Generate Sequence": "Number/alphabet sequence",
-            "Text to Morse Code": "Convert to Morse",
-            "Morse to Text": "Convert from Morse",
-            "Pig Latin": "Convert to Pig Latin",
-            "Atbash Cipher": "Atbash substitution",
-            "Vigenere Cipher": "Vigenere cipher",
-            "Affine Cipher": "Affine cipher",
+            "Extract Domains": "Extract domain names",
+            "Extract IPv4 Addresses": "Find IPv4 addresses",
+            "Extract IPv6 Addresses": "Find IPv6 addresses",
+            "Extract MAC Addresses": "Find MAC addresses",
+            "Extract Numbers": "Extract numeric values",
+            "Extract Hashtags": "Extract #hashtags",
+            "Extract Mentions": "Extract @mentions",
+            "Strip HTML Tags": "Remove HTML tags",
+            "Strip Markdown Tags": "Remove Markdown tags",
+            "Strip Punctuation": "Remove punctuation",
+            "Strip ANSI Escape Codes": "Remove ANSI codes",
+            "Split by Comma": "Split text by comma",
+            "Split by Space": "Split text by space",
+            "Split by Newline": "Split text by newline",
+            "Join Lines by Comma": "Join lines with comma",
+            "Join Lines by Space": "Join lines with space",
+            "Chunk Text": "Split into fixed-size chunks",
+            "Truncate Text": "Truncate to N characters",
+            "Add Prefix to Lines": "Add prefix to each line",
+            "Add Suffix to Lines": "Add suffix to each line",
+            "String to ASCII Array": "Convert to ASCII codes",
+            "ASCII Array to String": "Convert ASCII codes to string",
+            "Zalgo Text Generator": "Generate Zalgo text",
+            "Leetspeak Generator": "Convert to leetspeak",
+            "Upside Down Text": "Flip text upside down",
+            "Vaporwave / Fullwidth Text": "Fullwidth characters",
+            "Braille Translation": "Convert to Braille",
+            "UUIDv4 Generator": "Generate random UUIDv4",
+            "ULID Generator": "Generate random ULID",
+            "NanoID Generator": "Generate random NanoID",
+            "Random Password Generator": "Generate random password",
+            "Lorem Ipsum Generator": "Generate Lorem Ipsum text",
+            "Slugify": "Convert to URL-friendly slug",
+            "Unslugify": "Restore from slug",
         }
-        return descriptions.get(name, "")
+        return descriptions.get(name, str(name))
+
+    def _populate_operations_table(self) -> None:
+        table = self.query_one("#operations-table", DataTable)
+        table.clear()
+        if not self._current_category:
+            return
+        ops = self._operations.get(self._current_category, [])
+        for name, func_name in ops:
+            desc = self._get_operation_description(name)
+            table.add_row(name, desc)
+        if table.row_count > 0:
+            table.move_cursor(row=0)
+            self._current_operation = table.get_row_at(0)[0]
 
     def _update_status(self) -> None:
         """Update the status bar."""
@@ -496,44 +563,21 @@ class CategoryScreen(Screen):
         operation = f" | [bold]{self._current_operation}[/bold]" if self._current_operation else ""
         status.update(
             f"[dim]Chars: {chars} | Words: {words} | Lines: {lines} | Category: {category}{operation}[/dim]"
-            "  [dim]Up/Down Navigate | Enter Execute | Ctrl+/ Search | Ctrl+O Open | Ctrl+S Save | Q Quit[/dim]"
+            "  [dim]Up/Down Navigate | Real-time Apply | Ctrl+/ Search | Ctrl+O Open | Ctrl+S Save | Q Quit[/dim]"
         )
 
-    def action_move_up(self) -> None:
-        """Move selection up."""
-        table = self.query_one("#operations-table", DataTable)
-        if table.row_count > 0 and table.cursor_row > 0:
-            table.move_cursor(row=table.cursor_row - 1)
-            self._update_status()
-
-    def action_move_down(self) -> None:
-        """Move selection down."""
-        table = self.query_one("#operations-table", DataTable)
-        if table.row_count > 0 and table.cursor_row < table.row_count - 1:
-            table.move_cursor(row=table.cursor_row + 1)
-            self._update_status()
-
-    def action_prev_category(self) -> None:
-        """Switch to previous category."""
-        if not self._category_names:
+    def _on_input_text_changed(self, text: str) -> None:
+        """Handle real-time text input changes."""
+        if not self._current_operation:
             return
-        idx = self._category_names.index(self._current_category)
-        idx = (idx - 1) % len(self._category_names)
-        self._current_category = self._category_names[idx]
-        self._update_category_label()
-        self._populate_operations_table()
-        self._update_status()
-
-    def action_next_category(self) -> None:
-        """Switch to next category."""
-        if not self._category_names:
+        func_name = self._operation_map.get(self._current_operation)
+        if not func_name:
             return
-        idx = self._category_names.index(self._current_category)
-        idx = (idx + 1) % len(self._category_names)
-        self._current_category = self._category_names[idx]
-        self._update_category_label()
-        self._populate_operations_table()
-        self._update_status()
+        input_text = text
+        result = self._run_operation(func_name, input_text)
+        if result is not None:
+            self.query_one("#text-output", TextArea).text = str(result)
+            self._update_status()
 
     def action_execute_operation(self) -> None:
         """Execute the selected operation."""
@@ -564,10 +608,10 @@ class CategoryScreen(Screen):
 
     def _run_operation(self, func_name: str, input_text: str):
         """Run a string operation by name."""
-        # Direct import approach - import all modules upfront
         from string_ops import (
             transform, encode, json_ops, format_ops,
-            find_replace, extract, hash_ops, statistics, misc
+            find_replace, extract, hash_ops, statistics, misc,
+            rearrange, manipulate, ciphers, escape
         )
 
         module_map = {
@@ -581,6 +625,12 @@ class CategoryScreen(Screen):
             'to_snake_case': transform,
             'to_kebab_case': transform,
             'to_constant_case': transform,
+            'to_dot_case': transform,
+            'to_path_case': transform,
+            'to_alternating_case': transform,
+            'to_sponge_case': transform,
+            'capitalize_first_letter': transform,
+            'decapitalize_first_letter': transform,
             'reverse_string': transform,
             'reverse_words': transform,
             'reverse_lines': transform,
@@ -588,6 +638,8 @@ class CategoryScreen(Screen):
             'repeat_string': transform,
             'base64_encode': encode,
             'base64_decode': encode,
+            'base64url_encode': encode,
+            'base64url_decode': encode,
             'url_encode': encode,
             'url_decode': encode,
             'html_encode': encode,
@@ -595,20 +647,47 @@ class CategoryScreen(Screen):
             'hex_encode': encode,
             'hex_decode': encode,
             'rot13': encode,
+            'rot47': encode,
+            'atbash': encode,
+            'caesar_cipher_encode': encode,
+            'caesar_cipher_decode': encode,
+            'vigenere_cipher_encode': ciphers,
+            'vigenere_cipher_decode': ciphers,
+            'morse_encode': ciphers,
+            'morse_decode': ciphers,
             'unicode_escape': encode,
             'unicode_unescape': encode,
             'binary_encode': encode,
             'binary_decode': encode,
             'octal_encode': encode,
             'octal_decode': encode,
-            'json_escape': json_ops,
-            'json_unescape': json_ops,
+            'base32_encode': encode,
+            'base32_decode': encode,
+            'base58_encode': encode,
+            'base58_decode': encode,
+            'base85_encode': encode,
+            'base85_decode': encode,
+            'punycode_encode': encode,
+            'punycode_decode': encode,
+            'quoted_printable_encode': encode,
+            'quoted_printable_decode': encode,
+            'json_escape': escape,
+            'json_unescape': escape,
             'json_pretty_print': json_ops,
             'json_minify': json_ops,
             'json_to_string': json_ops,
             'string_to_json': json_ops,
             'json_diff': json_ops,
             'json_path_extract': json_ops,
+            'xml_pretty_print': json_ops,
+            'xml_minify': json_ops,
+            'sql_pretty_print': json_ops,
+            'sql_minify': json_ops,
+            'css_pretty_print': json_ops,
+            'css_minify': json_ops,
+            'parse_query_string': json_ops,
+            'stringify_query_string': json_ops,
+            'jwt_decode': json_ops,
             'trim': format_ops,
             'trim_left': format_ops,
             'trim_right': format_ops,
@@ -633,6 +712,18 @@ class CategoryScreen(Screen):
             'remove_line_numbers': format_ops,
             'extract_lines': format_ops,
             'repeat_lines': format_ops,
+            'remove_all_whitespace': format_ops,
+            'remove_duplicate_words': format_ops,
+            'center_align': format_ops,
+            'left_align': format_ops,
+            'right_align': format_ops,
+            'justify': format_ops,
+            'spaces_to_tabs': format_ops,
+            'tabs_to_spaces': format_ops,
+            'expand_tabs': format_ops,
+            'normalize_newlines_crlf_lf': format_ops,
+            'normalize_newlines_lf_crlf': format_ops,
+            'normalize_newlines_cr_lf': format_ops,
             'find_and_replace': find_replace,
             'find_and_replace_all': find_replace,
             'regex_find': find_replace,
@@ -649,26 +740,81 @@ class CategoryScreen(Screen):
             'extract_first_n': extract,
             'extract_last_n': extract,
             'extract_by_line_range': extract,
+            'extract_domains': extract,
+            'extract_ipv4': extract,
+            'extract_ipv6': extract,
+            'extract_mac': extract,
+            'extract_numbers': extract,
+            'extract_hashtags': extract,
+            'extract_mentions': extract,
+            'strip_html_tags': extract,
+            'strip_markdown_tags': extract,
+            'strip_punctuation': extract,
+            'strip_ansi_codes': extract,
             'hash_md5': hash_ops,
+            'hash_md2': hash_ops,
+            'hash_md4': hash_ops,
             'hash_sha1': hash_ops,
+            'hash_sha224': hash_ops,
             'hash_sha256': hash_ops,
+            'hash_sha384': hash_ops,
             'hash_sha512': hash_ops,
+            'hash_sha512_224': hash_ops,
+            'hash_sha512_256': hash_ops,
+            'hash_sha3_224': hash_ops,
+            'hash_sha3_256': hash_ops,
+            'hash_sha3_384': hash_ops,
+            'hash_sha3_512': hash_ops,
+            'hash_keccak_224': hash_ops,
+            'hash_keccak_256': hash_ops,
+            'hash_keccak_384': hash_ops,
+            'hash_keccak_512': hash_ops,
+            'hash_shake128': hash_ops,
+            'hash_shake256': hash_ops,
+            'hash_blake2b': hash_ops,
+            'hash_blake2s': hash_ops,
+            'hash_blake3': hash_ops,
+            'hash_ripemd160': hash_ops,
+            'hash_whirlpool': hash_ops,
+            'hash_tiger': hash_ops,
+            'hash_crc16': hash_ops,
             'hash_crc32': hash_ops,
-            'hash_hmac': hash_ops,
+            'hash_adler32': hash_ops,
+            'hash_fnv1a': hash_ops,
+            'hash_murmurhash': hash_ops,
+            'hash_xxhash': hash_ops,
+            'hash_hmac_md5': hash_ops,
+            'hash_hmac_sha1': hash_ops,
+            'hash_hmac_sha256': hash_ops,
+            'hash_hmac_sha512': hash_ops,
+            'hash_bcrypt': hash_ops,
+            'hash_scrypt': hash_ops,
+            'hash_argon2': hash_ops,
+            'hash_pbkdf2': hash_ops,
             'count_characters': statistics,
             'count_characters_no_space': statistics,
             'count_words': statistics,
             'count_lines': statistics,
             'count_bytes': statistics,
+            'count_vowels': statistics,
+            'count_consonants': statistics,
             'character_frequency': statistics,
             'word_frequency': statistics,
             'shannon_entropy': statistics,
             'is_palindrome': statistics,
+            'is_anagram': statistics,
             'levenshtein_distance': statistics,
+            'jaro_winkler_distance': statistics,
+            'hamming_distance': statistics,
+            'soundex': statistics,
+            'metaphone': statistics,
+            'double_metaphone': statistics,
             'longest_word': statistics,
             'shortest_word': statistics,
             'count_unique_words': statistics,
             'readability_score': statistics,
+            'find_most_frequent_word': statistics,
+            'find_most_frequent_char': statistics,
             'diff_texts': misc,
             'generate_uuid': misc,
             'generate_password': misc,
@@ -677,9 +823,49 @@ class CategoryScreen(Screen):
             'text_to_morse': misc,
             'morse_to_text': misc,
             'pig_latin': misc,
-            'atbash': misc,
-            'vigenere_cipher': misc,
             'affine_cipher': misc,
+            'generate_zalgo': misc,
+            'generate_leetspeak': misc,
+            'generate_upside_down': misc,
+            'generate_vaporwave': misc,
+            'generate_braille': misc,
+            'generate_ulid': misc,
+            'generate_nanoid': misc,
+            'unslugify': misc,
+            'shuffle_characters': rearrange,
+            'shuffle_words': rearrange,
+            'shuffle_lines': rearrange,
+            'sort_characters_asc': rearrange,
+            'sort_characters_desc': rearrange,
+            'sort_words_asc': rearrange,
+            'sort_words_desc': rearrange,
+            'sort_lines_asc': rearrange,
+            'sort_lines_desc': rearrange,
+            'sort_lines_by_length': rearrange,
+            'split_by_comma': manipulate,
+            'split_by_space': manipulate,
+            'split_by_newline': manipulate,
+            'join_by_comma': manipulate,
+            'join_by_space': manipulate,
+            'chunk_text': manipulate,
+            'add_prefix_lines': manipulate,
+            'add_suffix_lines': manipulate,
+            'string_to_ascii_array': manipulate,
+            'ascii_array_to_string': manipulate,
+            'xml_escape': escape,
+            'xml_unescape': escape,
+            'csv_escape': escape,
+            'csv_unescape': escape,
+            'sql_escape': escape,
+            'sql_unescape': escape,
+            'regex_escape': escape,
+            'c_string_escape': escape,
+            'c_string_unescape': escape,
+            'java_string_escape': escape,
+            'java_string_unescape': escape,
+            'python_string_escape': escape,
+            'python_string_unescape': escape,
+            'bash_escape': escape,
         }
 
         module = module_map.get(func_name)
@@ -697,6 +883,22 @@ class CategoryScreen(Screen):
             return f"Error: This operation requires additional parameters.\n{e}"
         except Exception as e:
             return f"Error executing operation: {e}"
+
+    def action_focus_next(self) -> None:
+        focus_order = [
+            "#categories-table",
+            "#operations-table",
+            "#text-input",
+            "#text-output",
+        ]
+
+        for i, widget_id in enumerate(focus_order):
+            if self.query_one(widget_id).has_focus:
+                next_idx = (i + 1) % len(focus_order)
+                self.query_one(focus_order[next_idx]).focus()
+                return
+
+        self.query_one(focus_order[0]).focus()
 
     def action_toggle_search(self) -> None:
         """Toggle search visibility."""
