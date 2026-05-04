@@ -126,7 +126,7 @@ def build_parser():
     name_map, func_map = _build_index()
 
     parser = argparse.ArgumentParser(
-        prog="string-ops",
+        prog="amber",
         description="Run 200+ string operations from the command line. "
                     "Without arguments, launches the interactive TUI.",
         formatter_class=argparse.RawDescriptionHelpFormatter,

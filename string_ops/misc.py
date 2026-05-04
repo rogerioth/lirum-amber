@@ -32,9 +32,23 @@ def generate_password(length: int = 16, use_upper: bool = True,
     if not chars:
         chars = string.ascii_letters + string.digits
 
-    pw = []
-    for _ in range(length):
-        pw.append(random.choice(chars))
+    pw = [random.choice(chars) for _ in range(length)]
+
+    i = 0
+    if use_upper:
+        pw[i] = random.choice(string.ascii_uppercase)
+        i += 1
+    if use_lower:
+        pw[i] = random.choice(string.ascii_lowercase)
+        i += 1
+    if use_digits:
+        pw[i] = random.choice(string.digits)
+        i += 1
+    if use_special:
+        pw[i] = random.choice('!@#$%^&*')
+        i += 1
+
+    random.shuffle(pw)
     return ''.join(pw)
 
 
@@ -166,3 +180,91 @@ def affine_cipher(s: str, a: int, b: int, decrypt: bool = False) -> str:
         else:
             result.append(c)
     return ''.join(result)
+
+def generate_zalgo(s: str) -> str:
+    """Add Zalgo text effects (diacritics)."""
+    import random
+    zalgo_chars = [
+        '\u0300', '\u0301', '\u0302', '\u0303', '\u0304', '\u0305', '\u0306', '\u0307',
+        '\u0308', '\u0309', '\u030a', '\u030b', '\u030c', '\u030d', '\u030e', '\u030f',
+    ]
+    result = []
+    for c in s:
+        result.append(c)
+        for _ in range(random.randint(1, 5)):
+            result.append(random.choice(zalgo_chars))
+    return ''.join(result)
+
+
+def generate_leetspeak(s: str) -> str:
+    """Convert to leetspeak."""
+    leet_map = {
+        'a': '4', 'e': '3', 'i': '1', 'o': '0', 's': '5', 't': '7',
+        'A': '4', 'E': '3', 'I': '1', 'O': '0', 'S': '5', 'T': '7',
+    }
+    return ''.join(leet_map.get(c, c) for c in s)
+
+
+def generate_upside_down(s: str) -> str:
+    """Convert to upside-down text."""
+    flip_map = {
+        'a': '\u0250', 'b': 'q', 'c': '\u0254', 'd': 'p', 'e': '\u01dd',
+        'f': '\u025f', 'g': '\u0253', 'h': '\u0265', 'i': '\u0131', 'j': '\u027e',
+        'k': '\u029e', 'l': 'l', 'm': '\u026f', 'n': 'u', 'o': 'o',
+        'p': 'd', 'q': 'b', 'r': '\u0279', 's': 's', 't': '\u0287',
+        'u': 'n', 'v': '\u028c', 'w': '\u028d', 'x': 'x', 'y': '\u028e', 'z': 'z',
+    }
+    return ''.join(flip_map.get(c, c) for c in reversed(s))
+
+
+def generate_vaporwave(s: str) -> str:
+    """Convert to fullwidth/vaporwave text."""
+    result = []
+    for c in s:
+        if ' ' <= c <= '~':
+            result.append(chr(ord(c) + 0xfee0))
+        else:
+            result.append(c)
+    return ''.join(result)
+
+
+def generate_braille(s: str) -> str:
+    """Convert to braille unicode (simplified - A-Z only)."""
+    braille_map = {
+        'a': '\u2801', 'b': '\u2803', 'c': '\u2809', 'd': '\u2819',
+        'e': '\u2811', 'f': '\u280b', 'g': '\u281b', 'h': '\u2813',
+        'i': '\u280a', 'j': '\u281a', 'k': '\u2805', 'l': '\u2807',
+        'm': '\u280d', 'n': '\u281d', 'o': '\u2815', 'p': '\u280f',
+        'q': '\u281f', 'r': '\u2817', 's': '\u280e', 't': '\u281e',
+        'u': '\u2825', 'v': '\u2827', 'w': '\u283a', 'x': '\u282d',
+        'y': '\u283d', 'z': '\u2835',
+    }
+    return ''.join(braille_map.get(c.lower(), c) for c in s)
+
+
+def generate_ulid() -> str:
+    """Generate ULID."""
+    try:
+        import ulid
+        return str(ulid.ulid())
+    except ImportError:
+        import base64
+        import time
+        ts = int(time.time() * 1000)
+        return base64.b32encode(ts.to_bytes(6, 'big')).decode().rstrip('=')[:26]
+
+
+def generate_nanoid() -> str:
+    """Generate NanoID."""
+    try:
+        from nanoid import generate
+        return generate()
+    except ImportError:
+        import random
+        chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-'
+        return ''.join(random.choice(chars) for _ in range(21))
+
+
+def unslugify(s: str) -> str:
+    """Convert slug to readable text."""
+    return s.replace('-', ' ').replace('_', ' ').title()

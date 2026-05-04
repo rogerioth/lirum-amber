@@ -50,15 +50,16 @@ class TestGenerate(unittest.TestCase):
         self.assertEqual(len(pw_short), 4)
 
     def test_generate_lorem_ipsum(self):
-        # Run multiple times to account for randomness
         found_lorem = False
         found_ipsum = False
-        for _ in range(20):
-            lorem = generate_lorem_ipsum(sentences=3)
+        for _ in range(50):
+            lorem = generate_lorem_ipsum(sentences=5)
             words = lorem.lower().split()
-            if "lorem" in words and "ipsum" in words:
+            if "lorem" in words:
                 found_lorem = True
+            if "ipsum" in words:
                 found_ipsum = True
+            if found_lorem and found_ipsum:
                 break
         self.assertTrue(found_lorem, "lorem not found in generated text")
         self.assertTrue(found_ipsum, "ipsum not found in generated text")

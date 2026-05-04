@@ -1,0 +1,204 @@
+Lowercase
+Uppercase
+Title Case
+Camel Case
+Pascal Case
+Snake Case
+Kebab Case
+Constant Case
+Dot Case
+Path Case
+Sentence Case
+Swap Case
+Alternating Case
+Sponge Case
+Capitalize First Letter
+Decapitalize First Letter
+Reverse String
+Reverse Words
+Reverse Lines
+Shuffle Characters
+Shuffle Words
+Shuffle Lines
+Sort Characters (Ascending)
+Sort Characters (Descending)
+Sort Words (Ascending)
+Sort Words (Descending)
+Sort Lines (Ascending)
+Sort Lines (Descending)
+Sort Lines by Length
+Trim
+Trim Left (Ltrim)
+Trim Right (Rtrim)
+Remove Extra Spaces
+Remove All Whitespace
+Remove Empty Lines
+Remove Duplicate Lines
+Remove Duplicate Words
+Pad Left
+Pad Right
+Center Align
+Left Align
+Right Align
+Justify
+Base64 Encode
+Base64 Decode
+Base64url Encode
+Base64url Decode
+URL Encode
+URL Decode
+HTML Entity Encode
+HTML Entity Decode
+Hex Encode
+Hex Decode
+Binary Encode
+Binary Decode
+Octal Encode
+Octal Decode
+Base32 Encode
+Base32 Decode
+Base58 Encode
+Base58 Decode
+Base85/Ascii85 Encode
+Base85/Ascii85 Decode
+Punycode Encode
+Punycode Decode
+Quoted-Printable Encode
+Quoted-Printable Decode
+ROT13
+ROT47
+Atbash Cipher
+Caesar Cipher Encode
+Caesar Cipher Decode
+Vigenère Cipher Encode
+Vigenère Cipher Decode
+Morse Code Encode
+Morse Code Decode
+MD2 Hash
+MD4 Hash
+MD5 Hash
+SHA-1 Hash
+SHA-224 Hash
+SHA-256 Hash
+SHA-384 Hash
+SHA-512 Hash
+SHA-512/224 Hash
+SHA-512/256 Hash
+SHA-3-224 Hash
+SHA-3-256 Hash
+SHA-3-384 Hash
+SHA-3-512 Hash
+Keccak-224 Hash
+Keccak-256 Hash
+Keccak-384 Hash
+Keccak-512 Hash
+Shake-128 Hash
+Shake-256 Hash
+BLAKE2b Hash
+BLAKE2s Hash
+BLAKE3 Hash
+RIPEMD-160 Hash
+Whirlpool Hash
+Tiger Hash
+CRC16
+CRC32
+Adler-32
+FNV-1a Hash
+MurmurHash
+xxHash
+HMAC-MD5
+HMAC-SHA1
+HMAC-SHA256
+HMAC-SHA512
+Bcrypt Hash
+Scrypt Hash
+Argon2 Hash
+PBKDF2 Hash
+JSON Escape
+JSON Unescape
+XML Escape
+XML Unescape
+CSV Escape
+CSV Unescape
+SQL Escape
+Regex Escape
+C String Escape
+C String Unescape
+Java String Escape
+Java String Unescape
+Python String Escape
+Python String Unescape
+Bash Escape
+Prettify JSON
+Minify JSON
+Prettify XML
+Minify XML
+Prettify SQL
+Minify SQL
+Prettify CSS
+Minify CSS
+Parse Query String
+Stringify Query String
+JWT Decode
+Character Count
+Character Count (No Spaces)
+Word Count
+Line Count
+Byte Size (UTF-8)
+Vowel Count
+Consonant Count
+Entropy Calculation
+Levenshtein Distance
+Jaro-Winkler Distance
+Hamming Distance
+Soundex
+Metaphone
+Double Metaphone
+Is Palindrome
+Is Anagram
+Find Most Frequent Word
+Find Most Frequent Character
+Extract Emails
+Extract URLs
+Extract Domains
+Extract IPv4 Addresses
+Extract IPv6 Addresses
+Extract MAC Addresses
+Extract Numbers
+Extract Hashtags
+Extract Mentions
+Strip HTML Tags
+Strip Markdown Tags
+Strip Punctuation
+Strip ANSI Escape Codes
+Split by Comma
+Split by Space
+Split by Newline
+Join Lines by Comma
+Join Lines by Space
+Chunk Text
+Truncate Text
+Add Prefix to Lines
+Add Suffix to Lines
+Spaces to Tabs
+Tabs to Spaces
+Normalize Newlines (CRLF to LF)
+Normalize Newlines (LF to CRLF)
+Normalize Newlines (CR to LF)
+String to ASCII Array
+ASCII Array to String
+Zalgo Text Generator
+Leetspeak Generator
+Upside Down Text
+Vaporwave / Fullwidth Text
+Braille Translation
+UUIDv4 Generator
+ULID Generator
+NanoID Generator
+Random Password Generator
+Lorem Ipsum Generator
+Slugify
+Unslugify
+Expand Tabs
+Wrap Text
+

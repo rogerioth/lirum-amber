@@ -16,6 +16,21 @@ from string_ops.encode import (
     binary_decode,
     octal_encode,
     octal_decode,
+    base64url_encode,
+    base64url_decode,
+    base32_encode,
+    base32_decode,
+    base58_encode,
+    base58_decode,
+    base85_encode,
+    base85_decode,
+    punycode_encode,
+    punycode_decode,
+    quoted_printable_encode,
+    quoted_printable_decode,
+    rot47,
+    caesar_cipher_encode,
+    caesar_cipher_decode,
 )
 
 
@@ -208,6 +223,131 @@ class TestOctal(unittest.TestCase):
     def test_octal_roundtrip(self):
         for s in ["hello", "a", "test"]:
             self.assertEqual(octal_decode(octal_encode(s)), s)
+
+
+class TestBase64Url(unittest.TestCase):
+    def test_base64url_encode(self):
+        self.assertEqual(base64url_encode("Hello"), base64.urlsafe_b64encode(b"Hello").decode())
+        self.assertEqual(base64url_encode(""), "")
+        self.assertEqual(base64url_encode("a+b"), base64.urlsafe_b64encode(b"a+b").decode())
+
+    def test_base64url_decode(self):
+        self.assertEqual(base64url_decode("SGVsbG8="), "Hello")
+        self.assertEqual(base64url_decode(""), "")
+        encoded = base64.urlsafe_b64encode(b"Hello World!").decode()
+        self.assertEqual(base64url_decode(encoded), "Hello World!")
+
+    def test_base64url_roundtrip(self):
+        test_strings = ["Hello", "Hello World!", "test", ""]
+        for s in test_strings:
+            self.assertEqual(base64url_decode(base64url_encode(s)), s)
+
+
+class TestBase32(unittest.TestCase):
+    def test_base32_encode(self):
+        self.assertEqual(base32_encode("Hello"), base64.b32encode(b"Hello").decode())
+        self.assertEqual(base32_encode(""), "")
+        self.assertEqual(base32_encode("A"), base64.b32encode(b"A").decode())
+
+    def test_base32_decode(self):
+        self.assertEqual(base32_decode(base64.b32encode(b"Hello").decode()), "Hello")
+        self.assertEqual(base32_decode(""), "")
+
+    def test_base32_roundtrip(self):
+        test_strings = ["Hello", "test", ""]
+        for s in test_strings:
+            self.assertEqual(base32_decode(base32_encode(s)), s)
+
+
+class TestBase58(unittest.TestCase):
+    def test_base58_encode(self):
+        self.assertEqual(base58_encode("Hello"), "9Ajdvzr")
+        self.assertEqual(base58_encode(""), "")
+        self.assertEqual(base58_encode("Test"), "3A836b")
+
+    def test_base58_decode(self):
+        self.assertEqual(base58_decode("9Ajdvzr"), "Hello")
+        self.assertEqual(base58_decode(""), "")
+
+    def test_base58_roundtrip(self):
+        test_strings = ["Hello", "Test", ""]
+        for s in test_strings:
+            self.assertEqual(base58_decode(base58_encode(s)), s)
+
+
+class TestBase85(unittest.TestCase):
+    def test_base85_encode(self):
+        self.assertEqual(base85_encode("Hello"), base64.a85encode(b"Hello").decode())
+        self.assertEqual(base85_encode(""), "")
+        self.assertEqual(base85_encode("AB"), base64.a85encode(b"AB").decode())
+
+    def test_base85_decode(self):
+        self.assertEqual(base85_decode(base64.a85encode(b"Hello").decode()), "Hello")
+        self.assertEqual(base85_decode(""), "")
+
+    def test_base85_roundtrip(self):
+        test_strings = ["Hello", "Test", ""]
+        for s in test_strings:
+            self.assertEqual(base85_decode(base85_encode(s)), s)
+
+
+class TestPunycode(unittest.TestCase):
+    def test_punycode_encode(self):
+        self.assertEqual(punycode_encode("münchen.de"), "mnchen.de-q9a")
+        self.assertEqual(punycode_encode("example.com"), "example.com")
+        self.assertEqual(punycode_encode(""), "")
+
+    def test_punycode_decode(self):
+        self.assertEqual(punycode_decode("mnchen.de-q9a"), "münchen.de")
+        self.assertEqual(punycode_decode("example.com"), "example.com")
+        self.assertEqual(punycode_decode(""), "")
+
+    def test_punycode_roundtrip(self):
+        test_strings = ["münchen.de", "example.com", ""]
+        for s in test_strings:
+            self.assertEqual(punycode_decode(punycode_encode(s)), s)
+
+
+class TestQuotedPrintable(unittest.TestCase):
+    def test_quoted_printable_encode(self):
+        self.assertEqual(quoted_printable_encode("café"), "caf=C3=A9")
+        self.assertEqual(quoted_printable_encode("Hello World!"), "Hello World!")
+        self.assertEqual(quoted_printable_encode(""), "")
+
+    def test_quoted_printable_decode(self):
+        self.assertEqual(quoted_printable_decode("caf=C3=A9"), "café")
+        self.assertEqual(quoted_printable_decode("Hello World!"), "Hello World!")
+        self.assertEqual(quoted_printable_decode(""), "")
+
+    def test_quoted_printable_roundtrip(self):
+        test_strings = ["café", "Hello World!", ""]
+        for s in test_strings:
+            self.assertEqual(quoted_printable_decode(quoted_printable_encode(s)), s)
+
+
+class TestRot47(unittest.TestCase):
+    def test_rot47(self):
+        self.assertEqual(rot47("Hello"), "w6==@")
+        self.assertEqual(rot47("123"), "123")
+        self.assertEqual(rot47(""), "")
+
+
+class TestCaesarCipher(unittest.TestCase):
+    def test_caesar_cipher_encode(self):
+        self.assertEqual(caesar_cipher_encode("Hello", 3), "Khoor")
+        self.assertEqual(caesar_cipher_encode("Hello", 0), "Hello")
+        self.assertEqual(caesar_cipher_encode("", 3), "")
+        self.assertEqual(caesar_cipher_encode("XYZ", 3), "ABC")
+
+    def test_caesar_cipher_decode(self):
+        self.assertEqual(caesar_cipher_decode("Khoor", 3), "Hello")
+        self.assertEqual(caesar_cipher_decode("ABC", 3), "XYZ")
+        self.assertEqual(caesar_cipher_decode("", 3), "")
+
+    def test_caesar_cipher_roundtrip(self):
+        test_strings = ["Hello", "XYZ", "Test 123!"]
+        for s in test_strings:
+            self.assertEqual(caesar_cipher_decode(caesar_cipher_encode(s, 3), 3), s)
 
 
 if __name__ == '__main__':

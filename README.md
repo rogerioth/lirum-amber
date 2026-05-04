@@ -1,6 +1,6 @@
-# String Operations TUI
+# Lirum Amber
 
-A terminal UI and CLI for performing 200+ string operations — case transforms, encoding/decoding, hashing, regex, JSON formatting, text statistics, and more.
+A terminal UI and CLI for 200+ string operations — case transforms, encoding/decoding, hashing, regex, JSON formatting, text statistics, and more. Built by [Lirum Labs](https://github.com/rogerioth/lirum-amber).
 
 Built with [Textual](https://textual.textualize.io/).
 
@@ -11,34 +11,35 @@ Built with [Textual](https://textual.textualize.io/).
 pip install -e .
 
 # Launch TUI (no arguments)
-string-ops
+amber
 
 # CLI mode — run an operation directly
-string-ops sha256 -t "hello"
-echo "hello world" | string-ops reverse_words
+amber sha256 -t "hello"
+echo "hello world" | amber reverse_words
 ```
 
 ## CLI Mode
 
-All 200+ operations are available from the command line. Run `string-ops --help` for the full list.
+All 200+ operations are available from the command line. Run `amber --help` for the full list.
 
 ### Basic usage
 
 ```bash
 # By display name
-string-ops lowercase -t "Hello World"          # → hello world
-string-ops "SHA-256 Hash" -t "hello"           # → 2cf24dba...
+amber lowercase -t "Hello World"          # → hello world
+amber "SHA-256 Hash" -t "hello"           # → 2cf24dba...
 
 # By function name (underscored)
-string-ops to_uppercase -t "Hello World"       # → HELLO WORLD
-string-ops base64_encode -t "hello"            # → aGVsbG8=
+amber to_uppercase -t "Hello World"       # → HELLO WORLD
+amber base64_encode -t "hello"            # → aGVsbG8=
 
 # From stdin (pipe)
-echo "hello world" | string-ops reverse_words  # → world hello
-cat file.txt | string-ops sha256               # hash file contents
+echo "hello world" | amber reverse_words  # → world hello
+cat file.txt | amber sha256               # hash file contents
 
 # From file
-string-ops lowercase -i file.txt
+amber lowercase -i file.txt
+```
 ```
 
 ### Extra parameters
@@ -46,24 +47,24 @@ string-ops lowercase -i file.txt
 Operations that need parameters use `-p KEY=VALUE` (repeatable):
 
 ```bash
-string-ops "Caesar Cipher Encode" -t "hello" -p shift=7    # → olssv
-string-ops truncate -t "hello world" -p width=5              # → he...
-string-ops "Pad Left" -t "42" -p width=5 -p char=0          # → 00042
-string-ops center_align -t "hello" -p width=20               # →        hello
+amber "Caesar Cipher Encode" -t "hello" -p shift=7    # → olssv
+amber truncate -t "hello world" -p width=5              # → he...
+amber "Pad Left" -t "42" -p width=5 -p char=0          # → 00042
+amber center_align -t "hello" -p width=20               # →        hello
 ```
 
 ### Generators (no input needed)
 
 ```bash
-string-ops generate_uuid                       # → 550e8400-e29b-...
-string-ops generate_password -p length=24      # → xK9#mP2...
+amber generate_uuid                       # → 550e8400-e29b-...
+amber generate_password -p length=24      # → xK9#mP2...
 ```
 
 ### Listing operations
 
 ```bash
-string-ops --list                              # all operations
-string-ops --help                              # operations with parameters
+amber --list                              # all operations
+amber --help                              # operations with parameters
 ```
 
 ## Key Features

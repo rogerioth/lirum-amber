@@ -1,4 +1,5 @@
 import unicodedata
+import random
 
 
 def to_uppercase(s: str) -> str:
@@ -160,3 +161,51 @@ def rotate_chars(s: str, n: int) -> str:
 
 def repeat_string(s: str, n: int) -> str:
     return s * n
+
+
+def to_dot_case(s: str) -> str:
+    import re
+    s1 = re.sub(r'([a-z0-9])([A-Z])', r'\1.\2', s)
+    s1 = re.sub(r'([A-Z]+)([A-Z][a-z])', r'\1.\2', s1)
+    s1 = re.sub(r'[-\s]+', '.', s1)
+    return s1.lower()
+
+
+def to_path_case(s: str) -> str:
+    import re
+    s1 = re.sub(r'([a-z0-9])([A-Z])', r'\1/\2', s)
+    s1 = re.sub(r'([A-Z]+)([A-Z][a-z])', r'\1/\2', s1)
+    s1 = re.sub(r'[-\s]+', '/', s1)
+    return s1.lower()
+
+
+def to_alternating_case(s: str) -> str:
+    result = []
+    for i, char in enumerate(s):
+        if i % 2 == 0:
+            result.append(char.lower())
+        else:
+            result.append(char.upper())
+    return ''.join(result)
+
+
+def to_sponge_case(s: str) -> str:
+    result = []
+    for char in s:
+        if random.random() > 0.5:
+            result.append(char.upper())
+        else:
+            result.append(char.lower())
+    return ''.join(result)
+
+
+def capitalize_first_letter(s: str) -> str:
+    if not s:
+        return s
+    return s[0].upper() + s[1:]
+
+
+def decapitalize_first_letter(s: str) -> str:
+    if not s:
+        return s
+    return s[0].lower() + s[1:]

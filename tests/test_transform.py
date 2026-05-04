@@ -15,6 +15,12 @@ from string_ops.transform import (
     reverse_lines,
     rotate_chars,
     repeat_string,
+    to_dot_case,
+    to_path_case,
+    to_alternating_case,
+    to_sponge_case,
+    capitalize_first_letter,
+    decapitalize_first_letter,
 )
 
 
@@ -119,6 +125,49 @@ class TestTransformCase(unittest.TestCase):
         self.assertEqual(to_constant_case("hello"), "HELLO")
         self.assertEqual(to_constant_case(""), "")
         self.assertEqual(to_constant_case("XMLParser"), "XML_PARSER")
+
+    def test_to_dot_case(self):
+        self.assertEqual(to_dot_case("hello world"), "hello.world")
+        self.assertEqual(to_dot_case("HelloWorld"), "hello.world")
+        self.assertEqual(to_dot_case(""), "")
+        self.assertEqual(to_dot_case("hello   world"), "hello.world")
+        self.assertEqual(to_dot_case("hello-world"), "hello.world")
+
+    def test_to_path_case(self):
+        self.assertEqual(to_path_case("hello world"), "hello/world")
+        self.assertEqual(to_path_case("HelloWorld"), "hello/world")
+        self.assertEqual(to_path_case(""), "")
+        self.assertEqual(to_path_case("hello   world"), "hello/world")
+        self.assertEqual(to_path_case("hello-world"), "hello/world")
+
+    def test_to_alternating_case(self):
+        self.assertEqual(to_alternating_case("hello"), "hElLo")
+        self.assertEqual(to_alternating_case("Hello"), "hElLo")
+        self.assertEqual(to_alternating_case(""), "")
+        self.assertEqual(to_alternating_case("test"), "tEsT")
+        self.assertEqual(to_alternating_case("HELLO"), "hElLo")
+
+    def test_to_sponge_case(self):
+        import random
+        random.seed(42)
+        self.assertEqual(to_sponge_case("hello"), "HellO")
+        self.assertEqual(to_sponge_case(""), "")
+        random.seed(123)
+        self.assertEqual(to_sponge_case("test"), "test")
+
+    def test_capitalize_first_letter(self):
+        self.assertEqual(capitalize_first_letter("hello world"), "Hello world")
+        self.assertEqual(capitalize_first_letter("Hello world"), "Hello world")
+        self.assertEqual(capitalize_first_letter(""), "")
+        self.assertEqual(capitalize_first_letter("hELLO"), "HELLO")
+        self.assertEqual(capitalize_first_letter("a"), "A")
+
+    def test_decapitalize_first_letter(self):
+        self.assertEqual(decapitalize_first_letter("Hello world"), "hello world")
+        self.assertEqual(decapitalize_first_letter("hello world"), "hello world")
+        self.assertEqual(decapitalize_first_letter(""), "")
+        self.assertEqual(decapitalize_first_letter("HELLO"), "hELLO")
+        self.assertEqual(decapitalize_first_letter("A"), "a")
 
 
 class TestTransformReverse(unittest.TestCase):

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Entry point for the String Operations application — TUI or CLI mode."""
+"""Lirum Amber — a TUI and CLI for 200+ string operations, by Lirum Labs."""
 
 import sys
 import os

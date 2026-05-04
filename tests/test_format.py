@@ -23,6 +23,18 @@ from string_ops.format_ops import (
     normalize_unicode,
     strip_non_ascii,
     remove_diacritics,
+    center_align,
+    left_align,
+    right_align,
+    justify,
+    remove_all_whitespace,
+    remove_duplicate_words,
+    spaces_to_tabs,
+    tabs_to_spaces,
+    expand_tabs,
+    normalize_newlines_crlf_lf,
+    normalize_newlines_lf_crlf,
+    normalize_newlines_cr_lf,
 )
 
 
@@ -209,6 +221,69 @@ class TestUnicode(unittest.TestCase):
         self.assertEqual(remove_diacritics("café"), "cafe")
         self.assertEqual(remove_diacritics("naïve"), "naive")
         self.assertEqual(remove_diacritics("hello"), "hello")
+
+
+class TestAlignment(unittest.TestCase):
+    def test_center_align(self):
+        self.assertEqual(center_align("hello", 11), "   hello   ")
+        self.assertEqual(center_align("hi", 10), "    hi    ")
+        self.assertEqual(center_align("hello", 3), "hello")
+
+    def test_left_align(self):
+        self.assertEqual(left_align("hello", 10), "hello     ")
+        self.assertEqual(left_align("hello", 3), "hello")
+
+    def test_right_align(self):
+        self.assertEqual(right_align("hello", 10), "     hello")
+        self.assertEqual(right_align("hello", 3), "hello")
+
+
+class TestJustify(unittest.TestCase):
+    def test_justify(self):
+        text = "hello world foo bar"
+        result = justify(text, 20)
+        self.assertEqual(len(result), 20)
+        self.assertIn("hello", result)
+
+    def test_justify_short(self):
+        self.assertEqual(justify("hello", 10), "hello     ")
+
+
+class TestWhitespaceOps(unittest.TestCase):
+    def test_remove_all_whitespace(self):
+        self.assertEqual(remove_all_whitespace("hello world"), "helloworld")
+        self.assertEqual(remove_all_whitespace("hello\tworld"), "helloworld")
+        self.assertEqual(remove_all_whitespace("hello\nworld"), "helloworld")
+
+    def test_remove_duplicate_words(self):
+        self.assertEqual(remove_duplicate_words("hello hello world"), "hello world")
+        self.assertEqual(remove_duplicate_words("foo bar foo bar"), "foo bar")
+        self.assertEqual(remove_duplicate_words("hello"), "hello")
+
+
+class TestTabSpaces(unittest.TestCase):
+    def test_spaces_to_tabs(self):
+        self.assertEqual(spaces_to_tabs("    hello", 4), "\thello")
+        self.assertEqual(spaces_to_tabs("  hi", 2), "\thi")
+
+    def test_tabs_to_spaces(self):
+        self.assertEqual(tabs_to_spaces("\thello", 4), "    hello")
+        self.assertEqual(tabs_to_spaces("\thi", 2), "  hi")
+
+    def test_expand_tabs(self):
+        self.assertEqual(expand_tabs("\thello", 4), "    hello")
+        self.assertEqual(expand_tabs("\thi", 2), "  hi")
+
+
+class TestNormalizeNewlines(unittest.TestCase):
+    def test_normalize_crlf_lf(self):
+        self.assertEqual(normalize_newlines_crlf_lf("a\r\nb\r\nc"), "a\nb\nc")
+
+    def test_normalize_lf_crlf(self):
+        self.assertEqual(normalize_newlines_lf_crlf("a\nb\nc"), "a\r\nb\r\nc")
+
+    def test_normalize_cr_lf(self):
+        self.assertEqual(normalize_newlines_cr_lf("a\rb\rc"), "a\nb\nc")
 
 
 if __name__ == '__main__':

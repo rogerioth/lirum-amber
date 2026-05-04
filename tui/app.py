@@ -46,6 +46,10 @@ class OperationModal(ModalScreen):
 class FileDialogScreen(ModalScreen):
     """Modal file dialog using DirectoryTree."""
 
+    BINDINGS = [
+        Binding("escape", "dismiss", "Close"),
+    ]
+
     CSS = """
     FileDialogScreen {
         align: center middle;
@@ -93,6 +97,17 @@ class FileDialogScreen(ModalScreen):
         yield DirectoryTree(".", id="file-tree")
         yield Button("Open", id="btn-open", variant="primary")
         yield Button("Cancel", id="btn-cancel", variant="default")
+
+    def action_dismiss(self) -> None:
+        self.dismiss(None)
+
+    def on_tree_node_selected(self, event) -> None:
+        data = event.node.data
+        if data is not None:
+            path = data.path
+            if os.path.isfile(path):
+                event.stop()
+                self.dismiss(str(path))
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "btn-cancel":
@@ -225,6 +240,14 @@ class CategoryScreen(Screen):
         background: $accent;
         color: $text;
         text-align: center;
+    }
+
+    DataTable > .datatable--cursor {
+        background: #6d28d9;
+    }
+
+    DataTable > .datatable--cursor:hover {
+        background: #7c3aed;
     }
     """
 
@@ -979,7 +1002,13 @@ class CategoryScreen(Screen):
 class StringOpsApp(App):
     """Main application class for String Operations TUI."""
 
-    TITLE = "String Operations"
+    TITLE = "Lirum Amber"
+
+    CSS = """
+    Screen {
+        background: #1a1228;
+    }
+    """
 
     BINDINGS = [
         Binding("q", "quit", "Quit"),

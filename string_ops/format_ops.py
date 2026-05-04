@@ -184,3 +184,95 @@ def repeat_lines(s: str, n: int) -> str:
     for line in lines:
         result.extend([line] * n)
     return '\n'.join(result)
+
+
+def center_align(s: str, width: int = 80) -> str:
+    return s.center(width)
+
+
+def left_align(s: str, width: int = 80) -> str:
+    return s.ljust(width)
+
+
+def right_align(s: str, width: int = 80) -> str:
+    return s.rjust(width)
+
+
+def justify(s: str, width: int = 80) -> str:
+    words = s.split()
+    if len(words) <= 1:
+        return s.ljust(width) if len(s) < width else s
+    lines = []
+    current_line = [words[0]]
+    for word in words[1:]:
+        # Calculate length of current line + space + new word
+        line_len = len(' '.join(current_line)) + 1 + len(word)
+        if line_len <= width:
+            current_line.append(word)
+        else:
+            lines.append(current_line)
+            current_line = [word]
+    if current_line:
+        lines.append(current_line)
+    justified = []
+    for i, line in enumerate(lines):
+        if i == len(lines) - 1 or len(line) == 1:
+            justified.append(' '.join(line).ljust(width) if len(' '.join(line)) < width else ' '.join(line))
+            continue
+        total_spaces = width - sum(len(w) for w in line)
+        gaps = len(line) - 1
+        base_spaces = total_spaces // gaps
+        extra = total_spaces % gaps
+        result = line[0]
+        for j in range(gaps):
+            spaces = base_spaces + (1 if j < extra else 0)
+            result += ' ' * spaces + line[j + 1]
+        justified.append(result)
+    return '\n'.join(justified)
+
+
+def remove_all_whitespace(s: str) -> str:
+    return re.sub(r'\s+', '', s)
+
+
+def remove_duplicate_words(s: str) -> str:
+    words = s.split()
+    seen = set()
+    result = []
+    for word in words:
+        if word not in seen:
+            seen.add(word)
+            result.append(word)
+    return ' '.join(result)
+
+
+def spaces_to_tabs(s: str, tab_width: int = 4) -> str:
+    lines = s.split('\n')
+    result = []
+    for line in lines:
+        # Replace leading spaces with tabs
+        num_spaces = len(line) - len(line.lstrip(' '))
+        tabs = num_spaces // tab_width
+        remaining = num_spaces % tab_width
+        result.append('\t' * tabs + ' ' * remaining + line.lstrip(' '))
+    return '\n'.join(result)
+
+
+def tabs_to_spaces(s: str, tab_width: int = 4) -> str:
+    return s.expandtabs(tab_width)
+
+
+def expand_tabs(s: str, tab_width: int = 4) -> str:
+    return tabs_to_spaces(s, tab_width)
+
+
+def normalize_newlines_crlf_lf(s: str) -> str:
+    return s.replace('\r\n', '\n')
+
+
+def normalize_newlines_lf_crlf(s: str) -> str:
+    return s.replace('\n', '\r\n')
+
+
+def normalize_newlines_cr_lf(s: str) -> str:
+    return s.replace('\r', '\n')
