@@ -6,6 +6,7 @@ from string_ops.hash_ops import (
     hash_sha256,
     hash_sha512,
     hash_crc32,
+    hash_adler32,
     hash_hmac,
     hash_md2,
     hash_md4,
@@ -60,6 +61,11 @@ class TestHash(unittest.TestCase):
 
     def test_hash_crc32(self):
         result = hash_crc32("hello")
+        self.assertIsInstance(result, str)
+        self.assertEqual(len(result), 8)
+
+    def test_hash_adler32(self):
+        result = hash_adler32("hello")
         self.assertIsInstance(result, str)
         self.assertEqual(len(result), 8)
 

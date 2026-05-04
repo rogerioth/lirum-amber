@@ -1,6 +1,7 @@
 import hashlib
 import binascii
 import hmac as hmac_module
+import zlib
 from typing import Optional
 
 # Try/except imports for external libraries
@@ -80,6 +81,10 @@ def hash_sha512(s: str) -> str:
 
 def hash_crc32(s: str) -> str:
     return format(binascii.crc32(s.encode('utf-8')) & 0xffffffff, '08x')
+
+
+def hash_adler32(s: str) -> str:
+    return format(zlib.adler32(s.encode('utf-8')) & 0xffffffff, '08x')
 
 
 def hash_hmac(s: str, key: str) -> str:
