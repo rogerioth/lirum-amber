@@ -15,7 +15,6 @@ from textual.widgets import (
 )
 from textual.screen import Screen, ModalScreen
 from textual import events
-import inspect
 
 
 # Add project root to path
@@ -565,35 +564,139 @@ class CategoryScreen(Screen):
 
     def _run_operation(self, func_name: str, input_text: str):
         """Run a string operation by name."""
-        modules = [
-            "string_ops.transform",
-            "string_ops.encode",
-            "string_ops.json_ops",
-            "string_ops.format_ops",
-            "string_ops.find_replace",
-            "string_ops.extract",
-            "string_ops.hash_ops",
-            "string_ops.statistics",
-            "string_ops.misc",
-        ]
+        # Direct import approach - import all modules upfront
+        from string_ops import (
+            transform, encode, json_ops, format_ops,
+            find_replace, extract, hash_ops, statistics, misc
+        )
 
-        for mod_name in modules:
-            try:
-                mod = __import__(mod_name, fromlist=[func_name])
-                func = getattr(mod, func_name, None)
-                if func is not None:
-                    try:
-                        return func(input_text)
-                    except TypeError:
-                        sig = inspect.signature(func)
-                        params = list(sig.parameters.keys())
-                        if len(params) >= 2:
-                            return func(input_text, *[None] * (len(params) - 1))
-                        return None
-            except Exception:
-                continue
+        module_map = {
+            'to_uppercase': transform,
+            'to_lowercase': transform,
+            'to_title_case': transform,
+            'to_sentence_case': transform,
+            'swap_case': transform,
+            'to_camel_case': transform,
+            'to_pascal_case': transform,
+            'to_snake_case': transform,
+            'to_kebab_case': transform,
+            'to_constant_case': transform,
+            'reverse_string': transform,
+            'reverse_words': transform,
+            'reverse_lines': transform,
+            'rotate_chars': transform,
+            'repeat_string': transform,
+            'base64_encode': encode,
+            'base64_decode': encode,
+            'url_encode': encode,
+            'url_decode': encode,
+            'html_encode': encode,
+            'html_decode': encode,
+            'hex_encode': encode,
+            'hex_decode': encode,
+            'rot13': encode,
+            'unicode_escape': encode,
+            'unicode_unescape': encode,
+            'binary_encode': encode,
+            'binary_decode': encode,
+            'octal_encode': encode,
+            'octal_decode': encode,
+            'json_escape': json_ops,
+            'json_unescape': json_ops,
+            'json_pretty_print': json_ops,
+            'json_minify': json_ops,
+            'json_to_string': json_ops,
+            'string_to_json': json_ops,
+            'json_diff': json_ops,
+            'json_path_extract': json_ops,
+            'trim': format_ops,
+            'trim_left': format_ops,
+            'trim_right': format_ops,
+            'trim_newlines': format_ops,
+            'collapse_whitespace': format_ops,
+            'remove_empty_lines': format_ops,
+            'remove_duplicate_lines': format_ops,
+            'sort_lines': format_ops,
+            'deduplicate_lines': format_ops,
+            'indent_text': format_ops,
+            'unindent_text': format_ops,
+            'wrap_text': format_ops,
+            'replace_line_endings': format_ops,
+            'normalize_unicode': format_ops,
+            'strip_non_ascii': format_ops,
+            'remove_diacritics': format_ops,
+            'slugify': format_ops,
+            'truncate': format_ops,
+            'pad_left': format_ops,
+            'pad_right': format_ops,
+            'add_line_numbers': format_ops,
+            'remove_line_numbers': format_ops,
+            'extract_lines': format_ops,
+            'repeat_lines': format_ops,
+            'find_and_replace': find_replace,
+            'find_and_replace_all': find_replace,
+            'regex_find': find_replace,
+            'regex_replace': find_replace,
+            'count_matches': find_replace,
+            'extract_regex_groups': find_replace,
+            'extract_emails': extract,
+            'extract_urls': extract,
+            'extract_phone_numbers': extract,
+            'extract_ip_addresses': extract,
+            'extract_dates': extract,
+            'extract_between_markers': extract,
+            'extract_regex': extract,
+            'extract_first_n': extract,
+            'extract_last_n': extract,
+            'extract_by_line_range': extract,
+            'hash_md5': hash_ops,
+            'hash_sha1': hash_ops,
+            'hash_sha256': hash_ops,
+            'hash_sha512': hash_ops,
+            'hash_crc32': hash_ops,
+            'hash_hmac': hash_ops,
+            'count_characters': statistics,
+            'count_characters_no_space': statistics,
+            'count_words': statistics,
+            'count_lines': statistics,
+            'count_bytes': statistics,
+            'character_frequency': statistics,
+            'word_frequency': statistics,
+            'shannon_entropy': statistics,
+            'is_palindrome': statistics,
+            'levenshtein_distance': statistics,
+            'longest_word': statistics,
+            'shortest_word': statistics,
+            'count_unique_words': statistics,
+            'readability_score': statistics,
+            'diff_texts': misc,
+            'generate_uuid': misc,
+            'generate_password': misc,
+            'generate_lorem_ipsum': misc,
+            'generate_sequence': misc,
+            'text_to_morse': misc,
+            'morse_to_text': misc,
+            'pig_latin': misc,
+            'atbash': misc,
+            'vigenere_cipher': misc,
+            'affine_cipher': misc,
+        }
 
-        return None
+        module = module_map.get(func_name)
+        if not module:
+            return None
+
+        func = getattr(module, func_name, None)
+        if not func:
+            return None
+
+        try:
+            return func(input_text)
+        except TypeError as e:
+            # Handle functions that require additional parameters
+            return f"Error: This operation requires additional parameters.\n{e}"
+        except Exception as e:
+            return f"Error executing operation: {e}"
 
     def action_toggle_search(self) -> None:
         """Toggle search visibility."""
