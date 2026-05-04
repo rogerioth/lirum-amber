@@ -1,8 +1,8 @@
-# String Operations TUI - Specification & Unit Tests
+# Lirum Amber — Specification & Tests
 
 ## Overview
 
-A TUI (Text User Interface) Python application for performing string operations. Users paste or load text, select an operation from categorized menus, and view the result.
+A TUI (Text User Interface) and CLI application for performing 200+ string operations. Users paste or load text, select an operation from categorized menus, and view the result — either interactively (TUI) or directly from the command line (CLI). Built by Lirum Labs.
 
 ## Architecture
 
@@ -1184,9 +1184,12 @@ class TestAffine(unittest.TestCase):
 ## File Structure
 
 ```
-string_ops_tui/
+lirum-amber/
 ├── pyproject.toml
 ├── README.md
+├── main.py
+├── cli.py
+├── operations_mapping.py
 ├── string_ops/
 │   ├── __init__.py
 │   ├── transform.py
@@ -1198,14 +1201,14 @@ string_ops_tui/
 │   ├── hash_ops.py
 │   ├── statistics.py
 │   ├── misc.py
+│   ├── ciphers.py
+│   ├── escape.py
+│   ├── manipulate.py
+│   ├── rearrange.py
 │   └── utils.py
 ├── tui/
 │   ├── __init__.py
-│   ├── app.py
-│   ├── categories.py
-│   ├── search.py
-│   ├── file_dialog.py
-│   └── widgets.py
+│   └── app.py
 ├── tests/
 │   ├── __init__.py
 │   ├── test_transform.py
@@ -1216,15 +1219,34 @@ string_ops_tui/
 │   ├── test_extract.py
 │   ├── test_hash.py
 │   ├── test_statistics.py
-│   ├── test_statistics_advanced.py
-│   └── test_misc.py
-└── main.py
+│   ├── test_misc.py
+│   ├── test_ciphers.py
+│   ├── test_escape.py
+│   ├── test_manipulate.py
+│   ├── test_rearrange.py
+│   ├── test_tui.py
+│   └── test_cli.py
+├── scripts/
+│   ├── install.sh
+│   ├── dev.sh
+│   ├── run_tests.sh
+│   ├── run_tui.sh
+│   ├── fmt.sh
+│   ├── lint.sh
+│   ├── build.sh
+│   └── clean.sh
+└── docs/
+    ├── architecture.md
+    ├── operations.md
+    └── tui.md
 ```
 
 ## Dependencies
 
 - `textual` — modern Python TUI framework
-- `rich` — optional, for rich text rendering in textual
+- `pycryptodome` — optional, for extended hash/crypto operations
+- `blake3` — optional, for BLAKE3 hashing
+- `xxhash` — optional, for xxHash hashing
 
 ## Keyboard Shortcuts
 
@@ -1235,8 +1257,22 @@ string_ops_tui/
 | `Ctrl+/` | Toggle search |
 | `Esc` | Close modal / go back |
 | `↑/↓` | Navigate categories / operations |
+| `Tab` | Cycle focus (categories → operations → input → output) |
 | `Enter` | Execute operation |
 | `q` | Quit |
+
+## CLI Mode
+
+When arguments are provided, `amber` runs in CLI mode (no TUI):
+
+```bash
+amber <operation> -t "input text"        # inline input
+amber <operation> -i file.txt            # file input
+echo "text" | amber <operation>          # pipe input
+amber <operation> -p key=value           # extra parameter
+amber --help                             # list all operations
+amber --list                             # list operations and exit
+```
 
 ## Error Handling
 
