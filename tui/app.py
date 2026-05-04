@@ -101,20 +101,16 @@ class FileDialogScreen(ModalScreen):
     def action_dismiss(self) -> None:
         self.dismiss(None)
 
-    def on_tree_node_selected(self, event) -> None:
-        data = event.node.data
-        if data is not None:
-            path = data.path
-            if os.path.isfile(path):
-                event.stop()
-                self.dismiss(str(path))
+    def on_directory_tree_file_selected(self, event) -> None:
+        event.stop()
+        self.dismiss(str(event.path))
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "btn-cancel":
             self.dismiss(None)
         elif event.button.id == "btn-open":
             tree = self.query_one("#file-tree", DirectoryTree)
-            path = tree.focus_node.path if tree.focus_node else None
+            path = tree.cursor_node.data.path if tree.cursor_node and tree.cursor_node.data else None
             if path and os.path.isfile(path):
                 self.dismiss(str(path))
             elif path:
