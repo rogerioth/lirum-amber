@@ -114,25 +114,30 @@ tests/            # pytest test suite (17 modules: 15 unit + TUI + CLI)
 
 ## Development
 
+Helper scripts live in `scripts/` — each handles venv setup automatically:
+
+```bash
+./scripts/install.sh     # create venv, install all deps
+./scripts/dev.sh         # install dev deps (ruff, mypy, crypto extras)
+./scripts/run_tests.sh   # run full test suite
+./scripts/run_tui.sh     # launch the TUI
+./scripts/fmt.sh         # format code with ruff
+./scripts/lint.sh        # lint and check formatting with ruff
+./scripts/build.sh       # build pip package to dist/
+./scripts/clean.sh       # remove caches and build artifacts
+```
+
+You can also go the manual route:
+
 ```bash
 pip install -e ".[dev]"
 pytest tests/
 ```
 
-### CLI Tests
-
-CLI behavior is tested via subprocess calls — covers display names, function names, extra params, generators, pipe input, file input, and error handling:
-
-```bash
-pytest tests/test_cli.py -v
-```
-
 ### TUI Tests
 
-The TUI is tested headlessly using Textual's `Pilot` API — no real terminal required:
+The TUI is tested headlessly using Textual's `Pilot` API — no real terminal required.
 
-```bash
-pytest tests/test_tui.py -v
-```
+### CLI Tests
 
-Tests cover initial focus, `Tab` cycling through panes, arrow key category navigation, Enter execution, and widget focus isolation.
+CLI behavior is tested via subprocess calls — covers display names, function names, extra params, generators, pipe input, file input, and error handling.

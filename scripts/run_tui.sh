@@ -24,5 +24,5 @@ if ! python3 -c "import textual" 2>/dev/null; then
 fi
 
 cd "$PROJECT_DIR"
-echo "Launching String Operations TUI..."
+echo "Launching Lirum Amber..."
 python3 main.py
